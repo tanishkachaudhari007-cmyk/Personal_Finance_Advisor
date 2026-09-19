@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Personal Finance Advisor</title>
+
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <header class="topbar">
+
+    <div>
+      <p class="eyebrow">SMART MONEY TRACKER</p>
+
+      <h1>Personal Finance Advisor</h1>
+
+      <p class="muted">
+        Track spending, plan budgets and get data-based financial guidance.
+      </p>
+    </div>
+
+    <div class="month-pill" id="currentMonth"></div>
+
+  </header>
+
+
+  <main class="container">
+
+
+    <!-- =====================================================
+         DASHBOARD STATS
+    ====================================================== -->
+
+    <section class="stats">
+
+      <article class="stat">
+        <span>Monthly Income</span>
+        <strong id="income">₹0</strong>
+      </article>
+
+      <article class="stat">
+        <span>Total Expenses</span>
+        <strong id="expenses">₹0</strong>
+      </article>
+
+      <article class="stat">
+        <span>Balance</span>
+        <strong id="balance">₹0</strong>
+      </article>
+
+      <article class="stat">
+        <span>Savings Rate</span>
+        <strong id="savingsRate">0%</strong>
+      </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         ADD INCOME + ADD EXPENSE
+    ====================================================== -->
+
+    <section class="grid two">
+
+      <!-- ADD INCOME -->
+
+      <article class="card">
+
+        <div class="card-head">
+          <h2>Add Income</h2>
+          <span>+</span>
+        </div>
+
+        <form id="incomeForm">
+
+          <input
+            name="source"
+            placeholder="Income source"
+            required
+          >
+
+          <input
+            name="amount"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="Amount (₹)"
+            required
+          >
+
+          <input
+            name="date"
+            type="date"
+          >
+
+          <button>Add Income</button>
+
+        </form>
+
+      </article>
+
+
+      <!-- ADD EXPENSE -->
+
+      <article class="card">
+
+        <div class="card-head">
+          <h2>Add Expense</h2>
+          <span>−</span>
+        </div>
+
+        <form id="expenseForm">
+
+          <input
+            name="title"
+            placeholder="Expense name"
+            required
+          >
+
+          <input
+            name="amount"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="Amount (₹)"
+            required
+          >
+
+          <select name="category">
+            {% for c in categories %}
+            <option>{{ c }}</option>
+            {% endfor %}
+          </select>
+
+          <input
+            name="date"
+            type="date"
+          >
+
+          <button>Add Expense</button>
+
+        </form>
+
+      </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         INCOME + EXPENSE HISTORY
+    ====================================================== -->
+
+    <section class="grid two">
+
+      <!-- INCOME HISTORY -->
+
+      <article class="card history-card">
+
+        <div class="card-head">
+          <h2>Income History</h2>
+          <span>EDIT OR DELETE</span>
+        </div>
+
+        <div
+          id="incomeHistory"
+          class="history-list">
+        </div>
+
+      </article>
+
+
+      <!-- EXPENSE HISTORY -->
+
+      <article class="card history-card">
+
+        <div class="card-head">
+          <h2>Expense History</h2>
+          <span>EDIT OR DELETE</span>
+        </div>
+
+        <div
+          id="expenseHistory"
+          class="history-list">
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =====================================================
+         EXPENSE BREAKDOWN + BUDGET PLANNER
+    ====================================================== -->
+
+    <section class="grid two">
+
+
+      <!-- EXPENSE BREAKDOWN -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>Expense Breakdown</h2>
+
+          <span>THIS MONTH</span>
+
+        </div>
+
+        <div
+          id="categoryList"
+          class="category-list">
+        </div>
+
+      </article>
+
+
+      <!-- BUDGET PLANNER -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>Budget Planner</h2>
+
+          <span>SET LIMITS</span>
+
+        </div>
+
+        <form id="budgetForm">
+
+          <select name="category">
+
+            {% for c in categories %}
+
+            <option>{{ c }}</option>
+
+            {% endfor %}
+
+          </select>
+
+          <input
+            name="amount"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="Budget (₹)"
+            required
+          >
+
+          <button>Save Budget</button>
+
+        </form>
+
+        <div
+          id="budgetList"
+          class="budget-list">
+        </div>
+
+      </article>
+
+    </section>
+
+<!-- =====================================================
+     FINANCIAL HEALTH SCORE
+====================================================== -->
+
+<section class="card health-card">
+
+  <div class="card-head">
+
+    <div>
+      <h2>Financial Health Score</h2>
+
+      <p class="muted">
+        An overall view of your financial habits.
+      </p>
+    </div>
+
+    <span class="ai-badge">
+      SCORE
+    </span>
+
+  </div>
+
+
+  <div class="health-score-container">
+
+    <div class="score-circle">
+
+      <strong id="healthScore">
+        -- 
+      </strong>
+
+      <span>/100</span>
+
+    </div>
+
+
+    <div class="health-info">
+
+      <h3 id="healthStatus">
+        Calculating...
+      </h3>
+
+      <p class="muted">
+        Your score is based on savings, spending,
+        budgets and saving goals.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="health-breakdown">
+
+    <div class="score-item">
+
+      <span>💰 Saving</span>
+
+      <strong id="savingScore">
+        --
+      </strong>
+
+    </div>
+
+
+    <div class="score-item">
+
+      <span>📊 Budget</span>
+
+      <strong id="budgetScore">
+        --
+      </strong>
+
+    </div>
+
+
+    <div class="score-item">
+
+      <span>💸 Spending</span>
+
+      <strong id="spendingScore">
+        --
+      </strong>
+
+    </div>
+
+
+    <div class="score-item">
+
+      <span>🎯 Goals</span>
+
+      <strong id="goalScore">
+        --
+      </strong>
+
+    </div>
+
+  </div>
+
+</section>
+    <!-- =====================================================
+         FINANCIAL ANALYTICS
+    ====================================================== -->
+
+    <section class="card analytics-card">
+
+      <div class="card-head">
+
+        <div>
+
+          <h2>Financial Analytics</h2>
+
+          <p class="muted">
+            Visual overview of your income and spending.
+          </p>
+
+        </div>
+
+        <span class="ai-badge">
+          ANALYTICS
+        </span>
+
+      </div>
+
+
+      <div class="charts-grid">
+
+
+        <!-- INCOME VS EXPENSE -->
+
+        <div class="chart-box">
+
+          <h3>Income vs Expenses</h3>
+
+          <div class="chart-container">
+
+            <canvas
+              id="incomeExpenseChart">
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+        <!-- EXPENSE CATEGORY -->
+
+        <div class="chart-box">
+
+          <h3>Expense by Category</h3>
+
+          <div class="chart-container">
+
+            <canvas
+              id="categoryChart">
+            </canvas>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SMART FINANCIAL INSIGHTS
+    ====================================================== -->
+
+    <section class="card insights-card">
+
+      <div class="card-head">
+
+        <div>
+
+          <h2>Smart Financial Insights</h2>
+
+          <p class="muted">
+            Automatic analysis of your income, spending,
+            budgets and goals.
+          </p>
+
+        </div>
+
+        <span class="ai-badge">
+          SMART
+        </span>
+
+      </div>
+
+
+      <div
+        id="insightsList"
+        class="insights-list">
+
+        <p class="muted">
+          Analyzing your financial data...
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         AI FINANCE ADVISOR
+    ====================================================== -->
+
+    <section class="card advisor-card">
+
+      <div class="card-head">
+
+        <div>
+
+          <h2>AI Finance Advisor</h2>
+
+          <p class="muted">
+            Ask about your current spending and budget.
+          </p>
+
+        </div>
+
+        <span class="ai-badge">
+          AI
+        </span>
+
+      </div>
+
+
+      <form
+        id="advisorForm"
+        class="advisor-form">
+
+        <input
+          name="question"
+          id="advisorQuestion"
+          placeholder="Example: How can I reduce my expenses this month?"
+          required
+        >
+
+        <button>
+          Ask Advisor
+        </button>
+
+      </form>
+
+
+      <div
+        id="advisorAnswer"
+        class="answer">
+
+        Your advisor will use the financial data stored
+        in this app to give practical budgeting guidance.
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SAVING GOALS + MONTHLY REPORT
+    ====================================================== -->
+
+    <section class="grid two">
+
+
+      <!-- SAVING GOALS -->
+
+      <article class="card">
+
+        <div class="card-head">
+
+          <h2>Saving Goals</h2>
+
+          <span>GOALS</span>
+
+        </div>
+
+
+        <form id="goalForm">
+
+          <input
+            name="name"
+            placeholder="Goal name"
+            required
+          >
+
+          <input
+            name="target"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="Target (₹)"
+            required
+          >
+
+          <button>
+            Add Goal
+          </button>
+
+        </form>
+
+
+        <div id="goalList"></div>
+        <div class="goal-progress-section">
+  <h3>Goal Progress</h3>
+  <div id="goalProgressList">
+    <p class="muted">No goals added yet.</p>
+  </div>
+</div>
+
+      </article>
+
+
+      <!-- MONTHLY REPORT -->
+
+      <article class="card report-card">
+
+        <div class="card-head">
+
+          <h2>Monthly Report</h2>
+
+          <span>SUMMARY</span>
+
+        </div>
+
+
+        <div id="report"></div>
+
+
+        <button
+          class="secondary"
+          id="refreshReport">
+
+          Refresh Report
+
+        </button>
+
+      </article>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div
+    id="toast"
+    class="toast">
+  </div>
+
+
+  <!-- =====================================================
+       CHART.JS
+  ====================================================== -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  <!-- =====================================================
+       APP JAVASCRIPT
+  ====================================================== -->
+
+  <script
+    src="{{ url_for('static', filename='js/app.js') }}">
+  </script>
+
+</body>
+
+</html>
